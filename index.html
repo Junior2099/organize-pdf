@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizar PDF'S</title>
+    <title>Editor de Páginas PDF - Qualidade Original</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/?size=100&id=5jar9D6idwWX&format=png&color=000000">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 </head>
 <body>
     <style>
@@ -206,6 +205,33 @@
             color: #27ae60;
             font-weight: 500;
         }
+        
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #27ae60;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            color: #34495e;
+            font-size: 14px;
+        }
 
         @media (max-width: 768px) {
             .container {
@@ -223,7 +249,7 @@
         }
     </style>
     <div class="container">
-        <h1>Organizar PDF's</h1>
+        <h1>Editor de Páginas PDF - Qualidade Original</h1>
         <div class="upload-section" id="dropArea">
             <div class="upload-icon">📄</div>
             <div class="upload-text">Arraste e solte seu PDF aqui ou</div>
@@ -237,6 +263,13 @@
             <div id="pagePreviews" class="page-previews"></div>
         </div>
         
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">Processando página 0 de 0...</div>
+        </div>
+        
         <div class="actions">
             <button id="downloadBtn" disabled>Baixar PDF Modificado</button>
             <button id="resetBtn" disabled>Reiniciar</button>
@@ -244,7 +277,7 @@
     </div>
 
     <script>
-   
+
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
 
         const pdfInput = document.getElementById('pdfInput');
@@ -254,8 +287,15 @@
         const pagePreviews = document.getElementById('pagePreviews');
         const dropArea = document.getElementById('dropArea');
         const fileInfo = document.getElementById('fileInfo');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
 
+        const { PDFDocument } = PDFLib;
+        
         let pdfDoc = null;
+        let pdfBytes = null;
+        let pdfName = '';
         let pdfPages = [];
         let selectedPages = [];
 
@@ -312,12 +352,14 @@
         }
 
         function handleFile(file) {
-            fileInfo.textContent = `Arquivo selecionado: ${file.name}`;
+            pdfName = file.name.replace('.pdf', '');
+            fileInfo.textContent = `Arquivo selecionado: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
             
             const fileReader = new FileReader();
             
             fileReader.onload = function() {
                 const typedarray = new Uint8Array(this.result);
+                pdfBytes = typedarray;
                 loadPDF(typedarray);
             };
             
@@ -398,45 +440,84 @@
         }
 
         async function downloadModifiedPDF() {
-            if (!pdfDoc || selectedPages.length === 0) return;
+            if (!pdfDoc || selectedPages.length === 0 || !pdfBytes) return;
             
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            try {
 
-            for (let i = 0; i < selectedPages.length; i++) {
-                const pageNum = selectedPages[i];
-                const page = await pdfDoc.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 1.0 });
-                
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                
-                await page.render({
-                    canvasContext: context,
-                    viewport: viewport
-                }).promise;
-                
-                const imgData = canvas.toDataURL('image/jpeg', 0.8);
-                
-                if (i > 0) {
-                    doc.addPage();
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = 'Carregando documento original...';
+
+                downloadBtn.disabled = true;
+                resetBtn.disabled = true;
+ 
+                const srcPdfDoc = await PDFDocument.load(pdfBytes);
+
+                const newPdfDoc = await PDFDocument.create();
+
+                progressBar.style.width = '20%';
+                progressText.textContent = 'Preparando para copiar páginas...';
+
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                for (let i = 0; i < selectedPages.length; i++) {
+                    const pageIndex = selectedPages[i] - 1; 
+
+                    const progress = 20 + Math.floor((i / selectedPages.length) * 70);
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `Copiando página ${i+1} de ${selectedPages.length}...`;
+
+                    const [copiedPage] = await newPdfDoc.copyPages(srcPdfDoc, [pageIndex]);
+
+                    newPdfDoc.addPage(copiedPage);
+
+                    await new Promise(resolve => setTimeout(resolve, 10));
                 }
+
+                progressBar.style.width = '90%';
+                progressText.textContent = 'Finalizando o documento...';
+
+                const modifiedPdfBytes = await newPdfDoc.save();
+
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Documento pronto! Salvando...';
+
+                setTimeout(() => {
+
+                    const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${pdfName}_modificado.pdf`;
+                    link.click();
+                    
+                    setTimeout(() => URL.revokeObjectURL(link.href), 100);
+                    
+                    progressContainer.style.display = 'none';
+                    downloadBtn.disabled = false;
+                    resetBtn.disabled = false;
+
+                    alert('PDF processado com sucesso! Mantendo a qualidade original do documento.');
+                }, 500);
                 
-                doc.addImage(imgData, 'JPEG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
+            } catch (error) {
+                console.error('Erro ao processar PDF:', error);
+                alert('Ocorreu um erro ao processar o PDF. Por favor, tente novamente.');
+
+                progressContainer.style.display = 'none';
+                downloadBtn.disabled = false;
+                resetBtn.disabled = false;
             }
-            
-            doc.save('documento_modificado.pdf');
         }
 
         function resetApp() {
             pdfDoc = null;
+            pdfBytes = null;
             pdfPages = [];
             selectedPages = [];
             pagePreviews.innerHTML = '';
             pdfInput.value = '';
             fileInfo.textContent = '';
+            progressContainer.style.display = 'none';
             downloadBtn.disabled = true;
             resetBtn.disabled = true;
         }
