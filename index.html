@@ -4,220 +4,342 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/?size=100&id=47812&format=png&color=000000">
-  <title>Visualizador de Arquivos</title>
+  <title>Conversor de PDF Profissional</title>
   <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2980b9;
+      --success-color: #27ae60;
+      --danger-color: #e74c3c;
+      --light-gray: #f5f5f5;
+      --medium-gray: #ecf0f1;
+      --dark-gray: #7f8c8d;
+      --text-color: #2c3e50;
+      --white: #ffffff;
+      --shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
+      background-color: var(--light-gray);
+      color: var(--text-color);
+      line-height: 1.6;
       padding: 20px;
-      background-color: #f5f5f5;
-      color: #333;
     }
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      background-color: white;
+      background-color: var(--white);
       padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
     }
+
     h1 {
       text-align: center;
-      color: #2c3e50;
       margin-bottom: 30px;
+      color: var(--text-color);
     }
+
     .upload-area {
-      border: 2px dashed #aaa;
+      border: 2px dashed var(--medium-gray);
       padding: 40px 20px;
       text-align: center;
       margin-bottom: 30px;
       border-radius: 8px;
-      background-color: #fafafa;
+      background-color: var(--white);
       transition: all 0.3s ease;
       cursor: pointer;
     }
+
     .upload-area:hover, .upload-area.dragover {
-      border-color: #3498db;
-      background-color: #eaf2f8;
+      border-color: var(--primary-color);
+      background-color: rgba(52, 152, 219, 0.05);
     }
+
     .upload-area p {
       margin: 0 0 15px;
       font-size: 18px;
-      color: #7f8c8d;
+      color: var(--dark-gray);
     }
-    .upload-area button {
-      background-color: #3498db;
-      color: white;
+
+    .btn {
       border: none;
       padding: 10px 20px;
       border-radius: 5px;
       font-size: 16px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .upload-area button:hover {
-      background-color: #2980b9;
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--white);
     }
-    .preview {
+
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: var(--white);
+    }
+
+    .btn-success:hover {
+      background-color: #219653;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: var(--white);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn:disabled {
+      background-color: var(--dark-gray);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+
+    .preview-container {
+      margin-bottom: 30px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--dark-gray);
+      font-size: 18px;
+    }
+
+    .file-preview {
       display: flex;
       flex-wrap: wrap;
       gap: 15px;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
+
     .pdf-container {
-      border: 1px solid #eee;
-      margin-bottom: 15px;
+      border: 1px solid var(--medium-gray);
       border-radius: 5px;
-      padding: 10px;
-      background-color: #f9f9f9;
+      padding: 15px;
+      background-color: var(--white);
       width: 100%;
     }
+
     .pdf-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 5px;
-      border-bottom: 1px solid #eee;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--medium-gray);
     }
+
     .pdf-title {
       font-weight: bold;
-      color: #2c3e50;
+      font-size: 16px;
     }
+
     .pdf-pages {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 15px;
     }
+
     .page-item {
-      border: 1px solid #ddd;
-      padding: 5px;
-      border-radius: 3px;
-      background-color: white;
+      border: 1px solid var(--medium-gray);
+      border-radius: 5px;
+      padding: 10px;
+      background-color: var(--white);
       position: relative;
+      transition: transform 0.2s;
     }
+
+    .page-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
     .page-item canvas {
-      max-width: 150px;
-      max-height: 200px;
+      max-width: 180px;
+      max-height: 250px;
       display: block;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .page-info {
-      font-size: 12px;
-      color: #7f8c8d;
-      text-align: center;
-      margin-top: 5px;
-    }
-    .remove-page-btn {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 10px;
-      cursor: pointer;
+
+    .page-controls {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
+      margin-top: 10px;
     }
-    .remove-pdf-btn {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      padding: 3px 8px;
+
+    .page-number {
       font-size: 12px;
-      cursor: pointer;
+      color: var(--dark-gray);
     }
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #95a5a6;
-      font-size: 18px;
+
+    .progress-container {
       width: 100%;
-    }
-    .actions {
-      text-align: center;
       margin-top: 20px;
     }
-    button#print-btn {
-      background-color: #27ae60;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    button#print-btn:disabled {
-      background-color: #95a5a6;
-      cursor: not-allowed;
-    }
+
     .progress-bar {
-      width: 100%;
-      height: 5px;
-      background-color: #ecf0f1;
-      border-radius: 5px;
-      margin-top: 10px;
+      height: 6px;
+      background-color: var(--medium-gray);
+      border-radius: 3px;
       overflow: hidden;
-      display: none;
+      margin-bottom: 5px;
     }
+
     .progress {
       height: 100%;
-      background-color: #3498db;
+      background-color: var(--primary-color);
       width: 0%;
-      transition: width 0.3s;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 14px;
+      color: var(--dark-gray);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      .pdf-pages {
+        justify-content: center;
+      }
+      
+      .actions {
+        flex-direction: column;
+        align-items: center;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Visualizador e Impressor de Arquivos</h1>
+    <h1>Conversor de PDF Profissional</h1>
     
     <div class="upload-area" id="upload-area">
       <p>Arraste e solte arquivos PDF ou imagens aqui</p>
-      <button id="select-files-btn">Selecionar Arquivos</button>
-      <input type="file" id="file-input" multiple accept="application/pdf,image/jpeg,image/png" style="display:none;">
-      <div class="progress-bar" id="progress-bar">
-        <div class="progress" id="progress"></div>
+      <button class="btn btn-primary" id="select-files-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+          <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+        </svg>
+        Selecionar Arquivos
+      </button>
+      <input type="file" id="file-input" multiple accept="application/pdf,image/jpeg,image/png,image/webp" style="display:none;">
+      
+      <div class="progress-container" id="upload-progress" style="display:none;">
+        <div class="progress-bar">
+          <div class="progress" id="upload-progress-bar"></div>
+        </div>
+        <div class="progress-text" id="upload-progress-text">Processando arquivos...</div>
       </div>
     </div>
     
-    <div class="preview" id="preview">
-      <div class="empty-state" id="empty-state">Nenhum arquivo carregado ainda</div>
+    <div class="preview-container">
+      <div class="file-preview" id="preview">
+        <div class="empty-state" id="empty-state">Nenhum arquivo carregado ainda</div>
+      </div>
     </div>
     
     <div class="actions">
-      <button id="print-btn" disabled>Gerar PDF para Impressão</button>
+      <button class="btn btn-success" id="generate-pdf-btn" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M5 1a2 2 0 0 0-2 2v1h10V3a2 2 0 0 0-2-2H5zm6 8H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z"/>
+          <path d="M0 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V7zm2.5 1a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+        </svg>
+        Gerar PDF de Alta Qualidade
+      </button>
+      
+      <button class="btn btn-danger" id="clear-all-btn" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+          <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+        </svg>
+        Limpar Tudo
+      </button>
+    </div>
+    
+    <div class="progress-container" id="pdf-progress" style="display:none;">
+      <div class="progress-bar">
+        <div class="progress" id="pdf-progress-bar"></div>
+      </div>
+      <div class="progress-text" id="pdf-progress-text">Gerando PDF...</div>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-
+    // Configuração inicial
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     const { jsPDF } = window.jspdf;
 
+    // Elementos DOM
     const uploadArea = document.getElementById('upload-area');
     const fileInput = document.getElementById('file-input');
     const selectFilesBtn = document.getElementById('select-files-btn');
     const preview = document.getElementById('preview');
-    const printBtn = document.getElementById('print-btn');
     const emptyState = document.getElementById('empty-state');
-    const progressBar = document.getElementById('progress-bar');
-    const progress = document.getElementById('progress');
+    const generatePdfBtn = document.getElementById('generate-pdf-btn');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const uploadProgress = document.getElementById('upload-progress');
+    const uploadProgressBar = document.getElementById('upload-progress-bar');
+    const uploadProgressText = document.getElementById('upload-progress-text');
+    const pdfProgress = document.getElementById('pdf-progress');
+    const pdfProgressBar = document.getElementById('pdf-progress-bar');
+    const pdfProgressText = document.getElementById('pdf-progress-text');
 
-    const files = {
-      pdfs: [],
-      images: []
+    // Estado da aplicação
+    const state = {
+      files: {
+        pdfs: [],
+        images: []
+      },
+      settings: {
+        dpi: 300, // Resolução profissional (300 DPI)
+        jpegQuality: 0.95 // Qualidade da imagem (95%)
+      }
     };
 
+    // Event Listeners
     uploadArea.addEventListener('click', () => fileInput.click());
     selectFilesBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -247,67 +369,75 @@
       }
     });
 
-    printBtn.addEventListener('click', generatePDF);
+    generatePdfBtn.addEventListener('click', generateHighQualityPDF);
+    clearAllBtn.addEventListener('click', clearAllFiles);
 
+    // Funções principais
     async function handleFiles(newFiles) {
-      progressBar.style.display = 'block';
-      progress.style.width = '0%';
-      
       const validFiles = Array.from(newFiles).filter(file => 
-        file.type === 'application/pdf' || file.type.startsWith('image/')
+        file.type === 'application/pdf' || 
+        file.type.startsWith('image/')
       );
       
       if (validFiles.length === 0) {
-        alert('Por favor, selecione apenas arquivos PDF ou imagens (JPEG/PNG).');
-        progressBar.style.display = 'none';
+        alert('Por favor, selecione apenas arquivos PDF ou imagens (JPEG, PNG, WEBP).');
         return;
       }
+      
+      // Configurar progresso
+      uploadProgress.style.display = 'block';
+      uploadProgressText.textContent = 'Processando arquivos...';
       
       let processed = 0;
       const totalFiles = validFiles.length;
       
       for (const file of validFiles) {
-        if (file.type === 'application/pdf') {
-          await processPDFFile(file);
-        } else if (file.type.startsWith('image/')) {
-          await processImageFile(file);
+        try {
+          if (file.type === 'application/pdf') {
+            await processPDFFile(file);
+          } else if (file.type.startsWith('image/')) {
+            await processImageFile(file);
+          }
+          
+          processed++;
+          const progressPercent = Math.round((processed / totalFiles) * 100);
+          uploadProgressBar.style.width = `${progressPercent}%`;
+          uploadProgressText.textContent = `Processando ${processed} de ${totalFiles} arquivos...`;
+          
+        } catch (error) {
+          console.error(`Erro ao processar arquivo ${file.name}:`, error);
+          alert(`Erro ao processar o arquivo ${file.name}. Por favor, tente novamente.`);
         }
-        
-        processed++;
-        progress.style.width = `${(processed / totalFiles) * 100}%`;
       }
       
+      uploadProgressText.textContent = 'Processamento concluído!';
       setTimeout(() => {
-        progressBar.style.display = 'none';
-      }, 500);
+        uploadProgress.style.display = 'none';
+      }, 1000);
+      
+      updateUI();
     }
 
     async function processPDFFile(file) {
-      try {
-        const pdfId = generateId();
-        const pdfData = await readFileAsArrayBuffer(file);
-        const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfData) }).promise;
-        
-        const pdfObj = {
-          id: pdfId,
-          file: file,
-          name: file.name,
-          numPages: pdfDoc.numPages,
-          pages: []
-        };
-        
-        for (let i = 1; i <= pdfDoc.numPages; i++) {
-          pdfObj.pages.push(i);
-        }
-        
-        files.pdfs.push(pdfObj);
-        renderPDFPreview(pdfObj);
-        updateUI();
-        
-      } catch (error) {
-        console.error('Error processing PDF:', error);
-        alert(`Erro ao processar o PDF ${file.name}`);
+      const pdfId = generateId();
+      const pdfData = await readFileAsArrayBuffer(file);
+      const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfData) }).promise;
+      
+      const pdfObj = {
+        id: pdfId,
+        file: file,
+        name: file.name,
+        numPages: pdfDoc.numPages,
+        pages: []
+      };
+      
+      // Adicionar todas as páginas inicialmente
+      for (let i = 1; i <= pdfDoc.numPages; i++) {
+        pdfObj.pages.push(i);
       }
+      
+      state.files.pdfs.push(pdfObj);
+      await renderPDFPreview(pdfObj);
     }
 
     async function renderPDFPreview(pdfObj) {
@@ -320,11 +450,11 @@
       
       const title = document.createElement('div');
       title.className = 'pdf-title';
-      title.textContent = pdfObj.name;
+      title.textContent = `${pdfObj.name} (${pdfObj.numPages} páginas)`;
       
       const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-pdf-btn';
-      removeBtn.textContent = 'Remover PDF';
+      removeBtn.className = 'btn btn-danger btn-sm';
+      removeBtn.innerHTML = 'Remover PDF';
       removeBtn.onclick = () => removePDF(pdfObj.id);
       
       header.appendChild(title);
@@ -337,24 +467,30 @@
       container.appendChild(pagesContainer);
       preview.insertBefore(container, emptyState);
       
+      // Renderizar visualização das páginas (com qualidade reduzida para performance)
       for (const pageNum of pdfObj.pages) {
-        await renderPDFPage(pdfObj, pageNum);
+        await renderPDFPagePreview(pdfObj, pageNum);
       }
     }
 
-    async function renderPDFPage(pdfObj, pageNum) {
+    async function renderPDFPagePreview(pdfObj, pageNum) {
       try {
         const pdfData = await readFileAsArrayBuffer(pdfObj.file);
         const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfData) }).promise;
         const page = await pdfDoc.getPage(pageNum);
         
-        const viewport = page.getViewport({ scale: 0.3 });
+        // Usar escala menor para preview (performance)
+        const viewport = page.getViewport({ scale: 0.5 });
+        
         const canvas = document.createElement('canvas');
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         const context = canvas.getContext('2d');
         
-        await page.render({ canvasContext: context, viewport }).promise;
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
         
         const pageItem = document.createElement('div');
         pageItem.className = 'page-item';
@@ -362,17 +498,21 @@
         pageItem.dataset.pageNum = pageNum;
         
         const pageNumber = document.createElement('div');
-        pageNumber.className = 'page-info';
+        pageNumber.className = 'page-number';
         pageNumber.textContent = `Página ${pageNum}`;
         
         const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-page-btn';
-        removeBtn.innerHTML = '&times;';
+        removeBtn.className = 'btn btn-danger btn-sm';
+        removeBtn.textContent = 'Remover';
         removeBtn.onclick = () => removePDFPage(pdfObj.id, pageNum);
         
+        const controls = document.createElement('div');
+        controls.className = 'page-controls';
+        controls.appendChild(pageNumber);
+        controls.appendChild(removeBtn);
+        
         pageItem.appendChild(canvas);
-        pageItem.appendChild(pageNumber);
-        pageItem.appendChild(removeBtn);
+        pageItem.appendChild(controls);
         
         const container = document.getElementById(`pdf-${pdfObj.id}`);
         if (container) {
@@ -382,12 +522,12 @@
           }
         }
       } catch (error) {
-        console.error('Error rendering PDF page:', error);
+        console.error('Erro ao renderizar página do PDF:', error);
       }
     }
 
     function removePDF(pdfId) {
-      files.pdfs = files.pdfs.filter(pdf => pdf.id !== pdfId);
+      state.files.pdfs = state.files.pdfs.filter(pdf => pdf.id !== pdfId);
       const container = document.getElementById(`pdf-${pdfId}`);
       if (container) {
         container.remove();
@@ -396,16 +536,28 @@
     }
 
     function removePDFPage(pdfId, pageNum) {
-      const pdfObj = files.pdfs.find(pdf => pdf.id === pdfId);
+      const pdfObj = state.files.pdfs.find(pdf => pdf.id === pdfId);
       if (!pdfObj) return;
       
+      // Remover a página do array
       pdfObj.pages = pdfObj.pages.filter(page => page !== pageNum);
-
+      
+      // Remover o elemento da página do DOM
       const pageElement = document.querySelector(`.page-item[data-pdf-id="${pdfId}"][data-page-num="${pageNum}"]`);
       if (pageElement) {
         pageElement.remove();
       }
       
+      // Atualizar título se necessário
+      const container = document.getElementById(`pdf-${pdfId}`);
+      if (container) {
+        const title = container.querySelector('.pdf-title');
+        if (title) {
+          title.textContent = `${pdfObj.name} (${pdfObj.pages.length} de ${pdfObj.numPages} páginas)`;
+        }
+      }
+      
+      // Se não houver mais páginas, remover o PDF
       if (pdfObj.pages.length === 0) {
         removePDF(pdfId);
       }
@@ -414,23 +566,17 @@
     }
 
     async function processImageFile(file) {
-      try {
-        const imgId = generateId();
-        const imgData = await readFileAsDataURL(file);
-        
-        files.images.push({
-          id: imgId,
-          file: file,
-          data: imgData
-        });
-        
-        renderImagePreview(imgId, file.name, imgData);
-        updateUI();
-        
-      } catch (error) {
-        console.error('Error processing image:', error);
-        alert(`Erro ao processar a imagem ${file.name}`);
-      }
+      const imgId = generateId();
+      const imgData = await readFileAsDataURL(file);
+      
+      state.files.images.push({
+        id: imgId,
+        file: file,
+        name: file.name,
+        data: imgData
+      });
+      
+      renderImagePreview(imgId, file.name, imgData);
     }
 
     function renderImagePreview(imgId, fileName, imgData) {
@@ -446,8 +592,8 @@
       title.textContent = fileName;
       
       const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-pdf-btn';
-      removeBtn.textContent = 'Remover Imagem';
+      removeBtn.className = 'btn btn-danger btn-sm';
+      removeBtn.textContent = 'Remover';
       removeBtn.onclick = () => removeImage(imgId);
       
       header.appendChild(title);
@@ -459,8 +605,10 @@
       
       const imgElement = document.createElement('img');
       imgElement.src = imgData;
-      imgElement.style.maxWidth = '200px';
+      imgElement.style.maxWidth = '100%';
       imgElement.style.maxHeight = '200px';
+      imgElement.style.borderRadius = '3px';
+      imgElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
       
       imgContainer.appendChild(imgElement);
       container.appendChild(header);
@@ -469,7 +617,7 @@
     }
 
     function removeImage(imgId) {
-      files.images = files.images.filter(img => img.id !== imgId);
+      state.files.images = state.files.images.filter(img => img.id !== imgId);
       const container = document.getElementById(`img-${imgId}`);
       if (container) {
         container.remove();
@@ -477,127 +625,184 @@
       updateUI();
     }
 
-    function updateUI() {
-      emptyState.style.display = (files.pdfs.length === 0 && files.images.length === 0) ? 'block' : 'none';
-      printBtn.disabled = (files.pdfs.length === 0 && files.images.length === 0);
+    function clearAllFiles() {
+      state.files.pdfs = [];
+      state.files.images = [];
+      preview.innerHTML = '';
+      emptyState.style.display = 'block';
+      updateUI();
     }
 
-    async function generatePDF() {
-      if (files.pdfs.length === 0 && files.images.length === 0) return;
+    async function generateHighQualityPDF() {
+      if (state.files.pdfs.length === 0 && state.files.images.length === 0) return;
       
-      printBtn.disabled = true;
-      printBtn.textContent = 'Gerando PDF...';
-      progressBar.style.display = 'block';
-      progress.style.width = '0%';
+      generatePdfBtn.disabled = true;
+      pdfProgress.style.display = 'block';
+      pdfProgressText.textContent = 'Preparando para gerar PDF...';
       
       try {
         const pdf = new jsPDF();
         let positionY = 20;
-        let processed = 0;
+        let processedPages = 0;
         const totalPages = countSelectedPages();
         
-        for (const pdfObj of files.pdfs) {
+        // Configurações de qualidade
+        const scale = state.settings.dpi / 72; // Fator de escala para alta resolução
+        
+        // Processar PDFs
+        for (const pdfObj of state.files.pdfs) {
           const pdfData = await readFileAsArrayBuffer(pdfObj.file);
           const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfData) }).promise;
           
           for (const pageNum of pdfObj.pages) {
-            const page = await pdfDoc.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 1.0 });
+            pdfProgressText.textContent = `Processando ${pdfObj.name} - página ${pageNum}...`;
             
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: scale });
+            
+            // Criar canvas com alta resolução
             const canvas = document.createElement('canvas');
             canvas.width = viewport.width;
             canvas.height = viewport.height;
             const context = canvas.getContext('2d');
             
-            await page.render({ canvasContext: context, viewport }).promise;
+            await page.render({
+              canvasContext: context,
+              viewport: viewport,
+              intent: 'print' // Melhor qualidade para impressão
+            }).promise;
             
-            const imgData = canvas.toDataURL('image/jpeg', 0.8);
+            const imgData = canvas.toDataURL('image/jpeg', state.settings.jpegQuality);
             
-            if (processed > 0 || positionY > 20) {
-              pdf.addPage();
+            // Adicionar nova página se necessário
+            if (processedPages > 0 || positionY > 20) {
+              pdf.addPage([viewport.width / scale, viewport.height / scale]);
               positionY = 20;
             }
             
-            const imgWidth = pdf.internal.pageSize.getWidth() - 20;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            // Adicionar imagem ao PDF mantendo proporções
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const imgWidth = pageWidth - 40; // Margens de 20px cada lado
+            const imgHeight = (viewport.height * imgWidth) / viewport.width;
             
-            pdf.addImage(imgData, 'JPEG', 10, positionY, imgWidth, imgHeight);
+            pdf.addImage(imgData, 'JPEG', 
+              20, // Margem esquerda
+              positionY, 
+              imgWidth, 
+              imgHeight,
+              undefined, 'MEDIUM'); // Compressão média para equilíbrio qualidade/tamanho
             
-            processed++;
-            progress.style.width = `${(processed / totalPages) * 100}%`;
+            processedPages++;
+            const progressPercent = Math.round((processedPages / totalPages) * 100);
+            pdfProgressBar.style.width = `${progressPercent}%`;
           }
         }
         
-        for (const imgObj of files.images) {
-          const img = new Image();
+        // Processar imagens
+        for (const imgObj of state.files.images) {
+          pdfProgressText.textContent = `Processando imagem ${imgObj.name}...`;
           
+          const img = new Image();
           await new Promise((resolve) => {
             img.onload = resolve;
             img.src = imgObj.data;
           });
           
-          if (processed > 0 || positionY > 20) {
+          // Adicionar nova página se necessário
+          if (processedPages > 0 || positionY > 20) {
             pdf.addPage();
             positionY = 20;
           }
           
-          const imgWidth = pdf.internal.pageSize.getWidth() - 20;
-          const imgHeight = (img.height * imgWidth) / img.width;
+          // Calcular dimensões para caber na página com margens
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
           
-          if (imgHeight > pdf.internal.pageSize.getHeight() - positionY - 20) {
-            pdf.addPage();
-            positionY = 20;
+          let imgWidth = pageWidth - 40; // Margens de 20px
+          let imgHeight = (img.height * imgWidth) / img.width;
+          
+          // Se for muito alto, ajustar
+          if (imgHeight > pageHeight - 40) {
+            imgHeight = pageHeight - 40;
+            imgWidth = (img.width * imgHeight) / img.height;
           }
           
-          pdf.addImage(imgObj.data, 'JPEG', 10, positionY, imgWidth, imgHeight);
-          positionY += imgHeight + 10;
+          pdf.addImage(imgObj.data, 'JPEG', 
+            (pageWidth - imgWidth) / 2, // Centralizar
+            positionY, 
+            imgWidth, 
+            imgHeight,
+            undefined, 'MEDIUM');
           
-          processed++;
-          progress.style.width = `${(processed / totalPages) * 100}%`;
+          processedPages++;
+          const progressPercent = Math.round((processedPages / totalPages) * 100);
+          pdfProgressBar.style.width = `${progressPercent}%`;
         }
         
+        pdfProgressText.textContent = 'Finalizando PDF...';
+        
+        // Salvar PDF
         const pdfBlob = pdf.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
+        
+        // Abrir em nova aba e focar
+        const newWindow = window.open(pdfUrl, '_blank');
+        if (newWindow) {
+          newWindow.focus();
+        }
         
       } catch (error) {
-        console.error('Error generating PDF:', error);
+        console.error('Erro ao gerar PDF:', error);
         alert('Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.');
       } finally {
-        printBtn.disabled = false;
-        printBtn.textContent = 'Gerar PDF para Impressão';
-        progressBar.style.display = 'none';
+        generatePdfBtn.disabled = false;
+        pdfProgressText.textContent = 'PDF gerado com sucesso!';
+        setTimeout(() => {
+          pdfProgress.style.display = 'none';
+        }, 2000);
       }
     }
 
     function countSelectedPages() {
       let count = 0;
       
-      for (const pdfObj of files.pdfs) {
+      // Contar páginas de PDF selecionadas
+      for (const pdfObj of state.files.pdfs) {
         count += pdfObj.pages.length;
       }
       
-      count += files.images.length;
+      // Contar imagens
+      count += state.files.images.length;
       
       return count;
     }
 
+    function updateUI() {
+      const hasFiles = state.files.pdfs.length > 0 || state.files.images.length > 0;
+      emptyState.style.display = hasFiles ? 'none' : 'block';
+      generatePdfBtn.disabled = !hasFiles;
+      clearAllBtn.disabled = !hasFiles;
+    }
+
+    // Funções utilitárias
     function generateId() {
       return Math.random().toString(36).substr(2, 9);
     }
 
     function readFileAsArrayBuffer(file) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
         reader.readAsArrayBuffer(file);
       });
     }
 
     function readFileAsDataURL(file) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
         reader.readAsDataURL(file);
       });
     }
